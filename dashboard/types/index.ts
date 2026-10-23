@@ -11,7 +11,7 @@ export interface IMUData {
 
 export interface InsoleData {
   foot: FootSide;
-  fsr: number[]; // 16 values
+  fsr: number[]; // 20 values: fsr[pin-1], zeros for unused pins 7,10,15,20
   ax: number;
   ay: number;
   az: number;
@@ -22,7 +22,7 @@ export interface InsoleData {
 }
 
 export interface FootState {
-  fsr: number[]; // 16 values
+  fsr: number[]; // 20 values
   imu: IMUData;
   connected: boolean;
   lastPacketTime: number | null;

@@ -25,10 +25,7 @@ export interface FootPadDisplayInfo {
 }
 
 /**
- * Fast lookup from Insole Pin Number to ESP32 payload array index (0..15)
- * ESP32 publishes fsr in ascending Pin order:
- * [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
- * Note: Pin 11 = Big Toe (C14), Pin 12 = Lesser Toe (C6)
+ * Fast lookup from Insole Pin Number to 16-element ESP32 payload array index (0..15)
  */
 export const PIN_TO_ARRAY_INDEX: Record<number, number> = {
   1: 0,
@@ -50,15 +47,29 @@ export const PIN_TO_ARRAY_INDEX: Record<number, number> = {
 };
 
 /**
- * Returns raw FSR value for a given insole pin number or array index
+ * Returns raw FSR value for a given insole pin number (1..19)
+ * Supports both:
+ * 1) 20-element array: fsr[pinNumber - 1] is the value directly
+ * 2) 16-element array: fsr[PIN_TO_ARRAY_INDEX[pinNumber]]
  */
 export function getSensorValue(fsr: number[], pinOrIndex: number): number {
-  if (!fsr || !Array.isArray(fsr)) return 0;
+  if (!fsr || !Array.isArray(fsr) || fsr.length === 0) return 0;
+
+  // 20-element array: direct pin mapping (fsr[pin - 1])
+  if (fsr.length >= 20) {
+    const pinIdx = pinOrIndex - 1;
+    if (pinIdx >= 0 && pinIdx < fsr.length) {
+      return fsr[pinIdx] || 0;
+    }
+  }
+
+  // 16-element array: mapped via PIN_TO_ARRAY_INDEX
   const idx = PIN_TO_ARRAY_INDEX[pinOrIndex];
   if (idx !== undefined && idx >= 0 && idx < fsr.length) {
     return fsr[idx] || 0;
   }
-  // Fallback to direct array index (0..15)
+
+  // Direct index fallback
   if (pinOrIndex >= 0 && pinOrIndex < fsr.length) {
     return fsr[pinOrIndex] || 0;
   }

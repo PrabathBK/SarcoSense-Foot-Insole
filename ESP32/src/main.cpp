@@ -48,13 +48,42 @@ const int S3 = 16;
 
 const int SIG = 34;
 
-// Mapping of 16 active insole pins to CD74HC4067 MUX channels
-// Ordered by Pin Number: [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
-// Pin 1->C15, Pin 2->C7, Pin 3->C11, Pin 4->C3, Pin 5->C13, Pin 6->C5, Pin 8->C9, Pin 9->C1,
-// Pin 11->C14 (Big Toe), Pin 12->C6 (Lesser Toe), Pin 13->C10, Pin 14->C2, Pin 16->C12, Pin 17->C4, Pin 18->C8, Pin 19->C0
-const byte PIN_CHANNELS[16] = {15, 7, 11, 3, 13, 5, 9, 1, 14, 6, 10, 2, 12, 4, 8, 0};
+// ==========================================
+// 20-Pin Connector → MUX Channel Mapping
+// ==========================================
+// The insole ribbon has 20 pins total.
+// Pins 7, 10, 15, 20 are UNUSED (reference/ground lines → always 0).
+// Active pins: 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19
+//
+// Index = connector pin number - 1  (0-based)
+// Value = CD74HC4067 MUX channel (0-15), or -1 for unused pin
+//
+// Pin  1 → C15 (Forefoot Medial)
+// Pin  2 → C7  (Midfoot Medial)
+// Pin  3 → C11 (Lower Mid Medial)
+// Pin  4 → C3  (Arch Medial)
+// Pin  5 → C13 (Midfoot Center)
+// Pin  6 → C5  (Lower Mid Center)
+// Pin  7 → UNUSED
+// Pin  8 → C9  (Arch Center)
+// Pin  9 → C1  (Forefoot Center)
+// Pin 10 → UNUSED
+// Pin 11 → C14 (Big Toe)
+// Pin 12 → C6  (Lesser Toe)
+// Pin 13 → C10 (Forefoot Lateral)
+// Pin 14 → C2  (Midfoot Lateral)
+// Pin 15 → UNUSED
+// Pin 16 → C12 (Heel Lateral)
+// Pin 17 → C4  (Heel Medial)
+// Pin 18 → C8  (Arch Lateral)
+// Pin 19 → C0  (Lower Mid Lateral)
+// Pin 20 → UNUSED
+const int PIN_MUX_CHANNEL[20] = {
+  15, 7, 11, 3, 13, 5, -1, 9, 1, -1, 14, 6, 10, 2, -1, 12, 4, 8, 0, -1
+};
 
-int fsrValues[16];
+int fsrRaw[16];   // raw MUX channel readings [C0..C15]
+int fsrOut[20];   // 20-element output: fsrOut[pin-1], zeros for unused pins
 
 void setup() {
   Serial.begin(115200);
@@ -98,19 +127,29 @@ void loop() {
   client.loop();
 
   // ======================
-  // Read 16 FSR sensors
+  // Read all 16 MUX channels
   // ======================
-  for (int channel = 0; channel < 16; channel++) {
-    selectChannel(channel);
-    // Allow MUX output to settle before sampling:
-    // 20µs was too short — C9/C1 and C14/C6 pairs differ only in S3,
-    // causing ADC to read residual charge from the previous channel.
-    // 500µs ensures full RC settling on the SIG line (16 × 500µs = 8ms << 50ms loop).
-    delayMicroseconds(500);
-    // Dummy read to flush ADC sample-and-hold capacitor from previous channel
-    analogRead(SIG);
+  // C14/C6 and C9/C1 pairs differ only in S3 bit, causing ADC crosstalk.
+  // Fix: 1ms settle + 2 dummy reads before each actual read.
+  // Total reading time: 16 × ~1.4ms ≈ 22ms (loop runs ~20Hz with delay(30) below)
+  for (int ch = 0; ch < 16; ch++) {
+    selectChannel(ch);
+    delayMicroseconds(1000);   // settle MUX + SIG line RC
+    analogRead(SIG);            // dummy flush #1 (clears ADC sample-hold cap)
+    delayMicroseconds(200);
+    analogRead(SIG);            // dummy flush #2
     delayMicroseconds(100);
-    fsrValues[channel] = analogRead(SIG);
+    fsrRaw[ch] = analogRead(SIG);
+  }
+
+  // ======================
+  // Build 20-element output
+  // ======================
+  // fsrOut[pin-1] = value at that connector pin, 0 for unused pins 7/10/15/20.
+  // This makes array index directly correspond to connector pin number.
+  for (int pin = 1; pin <= 20; pin++) {
+    int ch = PIN_MUX_CHANNEL[pin - 1];
+    fsrOut[pin - 1] = (ch < 0) ? 0 : fsrRaw[ch];
   }
 
   // ======================
@@ -127,12 +166,11 @@ void loop() {
   payload += "\"ts\":" + String(millis()) + ",";
 
   payload += "\"fsr\":[";
-  for (int i = 0; i < 16; i++) {
-    payload += String(fsrValues[PIN_CHANNELS[i]]);
-    if (i < 15)
+  for (int i = 0; i < 20; i++) {
+    payload += String(fsrOut[i]);
+    if (i < 19)
       payload += ",";
   }
-  
   payload += "],";
 
   payload += "\"ax\":" + String(a.acceleration.x, 2) + ",";
@@ -152,7 +190,7 @@ void loop() {
   // Serial monitor output
   Serial.println(payload);
 
-  delay(50); // ~20 Hz
+  delay(30); // ~20 Hz (22ms reading + 30ms = ~52ms cycle)
 }
 
 // ======================

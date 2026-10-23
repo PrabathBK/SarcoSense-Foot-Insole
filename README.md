@@ -250,28 +250,36 @@ The ESP32 firmware reads the multiplexer channels and outputs the `fsr` array so
 
 ### Complete Insole Pin to MUX Channel & Payload Index Mapping Table
 
+The ESP32 outputs a 20-element array corresponding 1-to-1 with connector pins: **`fsr[pinNumber - 1]`**.
+Unused reference lines (pins 7, 10, 15, 20) are permanently `0`.
+
 | Physical Foot Zone | Insole Pin (New) | Old Number | ESP32 Array Index | MUX Input Channel |
 |---|---|---|---|---|
-| **Big Toe** | **11** | 2 | `fsr[8]` | **C14** |
-| **Lesser Toe** | **12** | 10 | `fsr[9]` | **C6** |
 | **Forefoot Medial** | **1** | 1 | `fsr[0]` | **C15** |
-| **Forefoot Center** | **9** | 15 | `fsr[7]` | **C1** |
-| **Forefoot Lateral** | **13** | 6 | `fsr[10]` | **C10** |
 | **Midfoot Medial** | **2** | 9 | `fsr[1]` | **C7** |
-| **Midfoot Center** | **5** | 3 | `fsr[4]` | **C13** |
-| **Midfoot Lateral** | **14** | 14 | `fsr[11]` | **C2** |
 | **Lower Mid Medial** | **3** | 5 | `fsr[2]` | **C11** |
-| **Lower Mid Center** | **6** | 11 | `fsr[5]` | **C5** |
-| **Lower Mid Lateral** | **19** | 16 | `fsr[15]` | **C0** |
 | **Arch Medial** | **4** | 13 | `fsr[3]` | **C3** |
-| **Arch Center** | **8** | 7 | `fsr[6]` | **C9** |
-| **Arch Lateral** | **18** | 8 | `fsr[14]` | **C8** |
-| **Heel Medial** | **17** | 12 | `fsr[13]` | **C4** |
-| **Heel Lateral** | **16** | 4 | `fsr[12]` | **C12** |
+| **Midfoot Center** | **5** | 3 | `fsr[4]` | **C13** |
+| **Lower Mid Center** | **6** | 11 | `fsr[5]` | **C5** |
+| *Reference Line* | *7* | — | `fsr[6]` | *(Unused = 0)* |
+| **Arch Center** | **8** | 7 | `fsr[7]` | **C9** |
+| **Forefoot Center** | **9** | 15 | `fsr[8]` | **C1** |
+| *Reference Line* | *10* | — | `fsr[9]` | *(Unused = 0)* |
+| **Big Toe** | **11** | 2 | `fsr[10]` | **C14** |
+| **Lesser Toe** | **12** | 10 | `fsr[11]` | **C6** |
+| **Forefoot Lateral** | **13** | 6 | `fsr[12]` | **C10** |
+| **Midfoot Lateral** | **14** | 14 | `fsr[13]` | **C2** |
+| *Reference Line* | *15* | — | `fsr[14]` | *(Unused = 0)* |
+| **Heel Lateral** | **16** | 4 | `fsr[15]` | **C12** |
+| **Heel Medial** | **17** | 12 | `fsr[16]` | **C4** |
+| **Arch Lateral** | **18** | 8 | `fsr[17]` | **C8** |
+| **Lower Mid Lateral** | **19** | 16 | `fsr[18]` | **C0** |
+| *Reference Line* | *20* | — | `fsr[19]` | *(Unused = 0)* |
 
 > [!NOTE]
-> - **Both Left and Right Foot ESP32 firmwares** publish this identical pin-ordered array `fsr[0..15]`.
+> - **Both Left and Right Foot ESP32 firmwares** publish this identical 20-element array `fsr[0..19]`. Every pin $P$ is directly at index $P-1$ (`fsr[pin - 1]`), eliminating any indexing confusion.
 > - **Insole Pin 11** connects to MUX C14 (Big Toe) and **Insole Pin 12** connects to MUX C6 (Lesser Toe).
+> - Dual-read settling routine eliminates ADC sample-and-hold crosstalk between channels.
 > - On the web dashboard, the Right foot displays the standard anatomical arrangement while the Left foot is horizontally mirrored (swapped) to match bilateral physical sensor orientation.
 
 ---
