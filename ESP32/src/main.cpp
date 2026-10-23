@@ -12,7 +12,7 @@ Adafruit_MPU6050 mpu;
 // Insole Configuration
 // ===========================
 // Set to "right" or "left" depending on which insole this firmware is flashed to:
-#define FOOT_SIDE "right"
+#define FOOT_SIDE "left"
 
 // ===========================
 // Forward Declarations
@@ -47,6 +47,12 @@ const int S2 = 17;
 const int S3 = 16;
 
 const int SIG = 34;
+
+// Mapping of 16 active insole pins to CD74HC4067 MUX channels
+// Ordered by Pin Number: [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
+// Pin 1->C15, Pin 2->C7, Pin 3->C11, Pin 4->C3, Pin 5->C13, Pin 6->C5, Pin 8->C9, Pin 9->C1,
+// Pin 11->C6, Pin 12->C14, Pin 13->C10, Pin 14->C2, Pin 16->C12, Pin 17->C4, Pin 18->C8, Pin 19->C0
+const byte PIN_CHANNELS[16] = {15, 7, 11, 3, 13, 5, 9, 1, 6, 14, 10, 2, 12, 4, 8, 0};
 
 int fsrValues[16];
 
@@ -115,10 +121,11 @@ void loop() {
 
   payload += "\"fsr\":[";
   for (int i = 0; i < 16; i++) {
-    payload += String(fsrValues[i]);
+    payload += String(fsrValues[PIN_CHANNELS[i]]);
     if (i < 15)
       payload += ",";
   }
+  
   payload += "],";
 
   payload += "\"ax\":" + String(a.acceleration.x, 2) + ",";

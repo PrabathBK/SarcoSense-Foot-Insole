@@ -219,39 +219,58 @@ pio device monitor -b 115200
 
 ---
 
-## 👣 16-Channel FSR Sensor Mapping
+## 👣 16-Channel FSR Sensor Mapping (20-Pin Connector)
 
-The 16 FSR pads correspond directly to the physical prototype photo ([`foot-numbered.jpeg`](file:///Users/prabathwijethilaka/Downloads/Sarcopenia/dashboard/public/foot-numbered.jpeg)).
+The physical smart insole ribbon cable contains 20 pins, where **pins 7, 10, 15, and 20 are unused / reference**, leaving **16 active pressure sensing pins**:
+`[1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]`.
 
-The CD74HC4067 multiplexer channels `0..15` map to array indices `fsr[0..15]`.
-Formula: **`sensorNumber = 16 - arrayIndex`** (or **`arrayIndex = 16 - sensorNumber`**):
+The ESP32 firmware reads the multiplexer channels and outputs the `fsr` array sorted in **Insole Pin order**:
+`fsr[0] = Pin 1, fsr[1] = Pin 2, ..., fsr[15] = Pin 19`.
 
+### Anatomical Layout (Right Foot Perspective)
 ```
        ┌────────────────────────┐
-       │   [#10]        [#2]    │   <- Row 1 (Toes)
+       │   [#11]        [#12]   │   <- Row 1 (Toes)
        │                        │
-       │   [#6]   [#15]  [#1]   │   <- Row 2 (Metatarsals)
+       │   [#13]  [#9]   [#1]   │   <- Row 2 (Metatarsals / Forefoot)
        │                        │
-       │   [#14]  [#3]   [#9]   │   <- Row 3 (Anterior Midfoot)
+       │   [#14]  [#5]   [#2]   │   <- Row 3 (Midfoot)
        │                        │
-       │   [#16]  [#11]  [#5]   │   <- Row 4 (Midfoot Arch)
+       │   [#19]  [#6]   [#3]   │   <- Row 4 (Lower Mid Arch)
        │                        │
-       │   [#8]   [#7]   [#13]  │   <- Row 5 (Heel-Lead)
+       │   [#18]  [#8]   [#4]   │   <- Row 5 (Arch / Heel-Lead)
        │                        │
-       │   [#4]         [#12]   │   <- Row 6 (Heel)
+       │   [#16]        [#17]   │   <- Row 6 (Heel)
        └────────────────────────┘
-         LEFT            RIGHT
-        COLUMN          COLUMN
+         LATERAL         MEDIAL
+        (Left Col)     (Right Col)
 ```
 
-| Row | Region | Left Column | Center Column | Right Column |
+### Complete Insole Pin to MUX Channel & Payload Index Mapping Table
+
+| Physical Foot Zone | Insole Pin (New) | Old Number | ESP32 Array Index | MUX Input Channel |
 |---|---|---|---|---|
-| **Row 1** | Toes | **#10** (`fsr[6]`) | — | **#2** (`fsr[14]`) |
-| **Row 2** | Metatarsals | **#6** (`fsr[10]`) | **#15** (`fsr[1]`) | **#1** (`fsr[15]`) |
-| **Row 3** | Anterior Midfoot | **#14** (`fsr[2]`) | **#3** (`fsr[13]`) | **#9** (`fsr[7]`) |
-| **Row 4** | Midfoot Arch | **#16** (`fsr[0]`) | **#11** (`fsr[5]`) | **#5** (`fsr[11]`) |
-| **Row 5** | Heel-Lead | **#8** (`fsr[8]`) | **#7** (`fsr[9]`) | **#13** (`fsr[3]`) |
-| **Row 6** | Heel | **#4** (`fsr[12]`) | — | **#12** (`fsr[4]`) |
+| **Big Toe** (Top Right) | **12** | 2 | `fsr[9]` | **C14** |
+| **Lesser Toe** (Top Left) | **11** | 10 | `fsr[8]` | **C6** |
+| **Forefoot Medial** (Row 2 Right) | **1** | 1 | `fsr[0]` | **C15** |
+| **Forefoot Center** (Row 2 Mid) | **9** | 15 | `fsr[7]` | **C1** |
+| **Forefoot Lateral** (Row 2 Left) | **13** | 6 | `fsr[10]` | **C10** |
+| **Midfoot Medial** (Row 3 Right) | **2** | 9 | `fsr[1]` | **C7** |
+| **Midfoot Center** (Row 3 Mid) | **5** | 3 | `fsr[4]` | **C13** |
+| **Midfoot Lateral** (Row 3 Left) | **14** | 14 | `fsr[11]` | **C2** |
+| **Lower Mid Medial** (Row 4 Right) | **3** | 5 | `fsr[2]` | **C11** |
+| **Lower Mid Center** (Row 4 Mid) | **6** | 11 | `fsr[5]` | **C5** |
+| **Lower Mid Lateral** (Row 4 Left) | **19** | 16 | `fsr[15]` | **C0** |
+| **Arch Medial** (Row 5 Right) | **4** | 13 | `fsr[3]` | **C3** |
+| **Arch Center** (Row 5 Mid) | **8** | 7 | `fsr[6]` | **C9** |
+| **Arch Lateral** (Row 5 Left) | **18** | 8 | `fsr[14]` | **C8** |
+| **Heel Medial** (Bottom Right) | **17** | 12 | `fsr[13]` | **C4** |
+| **Heel Lateral** (Bottom Left) | **16** | 4 | `fsr[12]` | **C12** |
+
+> [!NOTE]
+> - **Both Left and Right Foot ESP32s** output this identical pin-ordered array `fsr[0..15]`.
+> - **Pin 12** is always **Big Toe** on both feet (anatomically Medial).
+> - On the web dashboard, the Left foot SVG automatically aligns Medial pads to the inside edge and Lateral pads to the outside edge.
 
 ---
 

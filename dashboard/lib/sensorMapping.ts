@@ -1,8 +1,9 @@
 import { FootSide } from "@/types";
 
 export interface SensorPadInfo {
-  sensorNum: number; // 1 to 16
-  arrayIndex: number; // 0 to 15 (array index = 16 - sensorNum)
+  pinNumber: number; // Insole Pin number: 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19
+  sensorNum: number; // Alias to pinNumber for backward compatibility
+  arrayIndex: number; // 0 to 15 (position in ESP32 JSON payload "fsr" array)
   name: string;
   region: "Toe" | "Forefoot" | "Midfoot" | "Heel";
   side: "Medial" | "Central" | "Lateral";
@@ -14,63 +15,70 @@ export interface SensorPadInfo {
 }
 
 /**
- * EXACT PHYSICAL MAPPING (from foot-numbered.jpeg)
- *
- * Layout on insole (Left to Right, Row by Row):
- * Row 1 (Toes):              #10 (Left),                     #2 (Right)
- * Row 2 (Metatarsals):       #6 (Left),      #15 (Center),   #1 (Right)
- * Row 3 (Forefoot):          #14 (Left),     #3 (Center),    #9 (Right)
- * Row 4 (Midfoot Arch):      #16 (Left),     #11 (Center),   #5 (Right)
- * Row 5 (Heel-Lead):         #8 (Left),      #7 (Center),    #13 (Right)
- * Row 6 (Heel):              #4 (Left),                      #12 (Right)
- *
- * Array mapping:
- * fsr[0]=16, fsr[1]=15, ..., fsr[15]=1 (arrayIndex = 16 - sensorNum)
+ * 20-PIN CONNECTOR INSOLE SENSOR MAPPING
+ * 
+ * Active insole pins: [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
+ * (Pins 7, 10, 15, 20 are unused / reference lines).
+ * 
+ * ESP32 publishes fsr array sorted strictly by insole pin number (1 to 19):
+ * fsr[0]=Pin 1, fsr[1]=Pin 2, ..., fsr[15]=Pin 19.
+ * 
+ * Physical Insole Layout (Right foot perspective, Row by Row):
+ * Row 1 (Toes):            Pin 11 (Lesser Toe),             Pin 12 (Big Toe)
+ * Row 2 (Metatarsals):     Pin 13 (Lateral), Pin 9 (Center), Pin 1 (Medial)
+ * Row 3 (Forefoot-Mid):    Pin 14 (Lateral), Pin 5 (Center), Pin 2 (Medial)
+ * Row 4 (Lower Mid Arch):  Pin 19 (Lateral), Pin 6 (Center), Pin 3 (Medial)
+ * Row 5 (Arch / Heel-Lead):Pin 18 (Lateral), Pin 8 (Center), Pin 4 (Medial)
+ * Row 6 (Heel):            Pin 16 (Lateral),                Pin 17 (Medial)
  */
 export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
   // ==========================================
   // ROW 1: TOES
   // ==========================================
   {
-    sensorNum: 10,
-    arrayIndex: 6,
-    name: "Toe Left (Outer)",
+    pinNumber: 11,
+    sensorNum: 11,
+    arrayIndex: 8,
+    name: "Lesser Toe",
     region: "Toe",
     side: "Lateral",
     coords: {
       left: { cx: 203.9, cy: 94.5, rx: 28, ry: 32 },
-      right: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 }, // swapped with #2
+      right: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 },
     },
   },
   {
-    sensorNum: 2,
-    arrayIndex: 14,
-    name: "Toe Right (Inner)",
+    pinNumber: 12,
+    sensorNum: 12,
+    arrayIndex: 9,
+    name: "Big Toe",
     region: "Toe",
     side: "Medial",
     coords: {
       left: { cx: 274.0, cy: 100.0, rx: 20, ry: 33 },
-      right: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 }, // swapped with #10
+      right: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 },
     },
   },
 
   // ==========================================
-  // ROW 2: METATARSALS
+  // ROW 2: METATARSALS / FOREFOOT
   // ==========================================
   {
-    sensorNum: 6,
+    pinNumber: 13,
+    sensorNum: 13,
     arrayIndex: 10,
-    name: "Forefoot Left",
+    name: "Forefoot Lateral",
     region: "Forefoot",
     side: "Lateral",
     coords: {
       left: { cx: 157.7, cy: 181.0, rx: 23, ry: 34 },
-      right: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 }, // swapped with #1
+      right: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 },
     },
   },
   {
-    sensorNum: 15,
-    arrayIndex: 1,
+    pinNumber: 9,
+    sensorNum: 9,
+    arrayIndex: 7,
     name: "Forefoot Center",
     region: "Forefoot",
     side: "Central",
@@ -80,35 +88,38 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     },
   },
   {
+    pinNumber: 1,
     sensorNum: 1,
-    arrayIndex: 15,
-    name: "Forefoot Right",
+    arrayIndex: 0,
+    name: "Forefoot Medial",
     region: "Forefoot",
     side: "Medial",
     coords: {
       left: { cx: 281.9, cy: 184.4, rx: 17, ry: 33 },
-      right: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 }, // swapped with #6
+      right: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 },
     },
   },
 
   // ==========================================
-  // ROW 3: FOREFOOT / MIDFOOT
+  // ROW 3: FOREFOOT-MIDFOOT
   // ==========================================
   {
+    pinNumber: 14,
     sensorNum: 14,
-    arrayIndex: 2,
-    name: "Forefoot-Mid Left",
+    arrayIndex: 11,
+    name: "Midfoot Lateral",
     region: "Forefoot",
     side: "Lateral",
     coords: {
       left: { cx: 142.9, cy: 272.1, rx: 15, ry: 34 },
-      right: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 }, // swapped with #9
+      right: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 },
     },
   },
   {
-    sensorNum: 3,
-    arrayIndex: 13,
-    name: "Forefoot-Mid Center",
+    pinNumber: 5,
+    sensorNum: 5,
+    arrayIndex: 4,
+    name: "Midfoot Center",
     region: "Forefoot",
     side: "Central",
     coords: {
@@ -117,35 +128,38 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     },
   },
   {
-    sensorNum: 9,
-    arrayIndex: 7,
-    name: "Forefoot-Mid Right",
+    pinNumber: 2,
+    sensorNum: 2,
+    arrayIndex: 1,
+    name: "Midfoot Medial",
     region: "Forefoot",
     side: "Medial",
     coords: {
       left: { cx: 273.2, cy: 276.0, rx: 20, ry: 35 },
-      right: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 }, // swapped with #14
+      right: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 },
     },
   },
 
   // ==========================================
-  // ROW 4: MIDFOOT ARCH
+  // ROW 4: LOWER MIDFOOT ARCH
   // ==========================================
   {
-    sensorNum: 16,
-    arrayIndex: 0,
-    name: "Midfoot Left",
+    pinNumber: 19,
+    sensorNum: 19,
+    arrayIndex: 15,
+    name: "Lower Mid Lateral",
     region: "Midfoot",
     side: "Lateral",
     coords: {
       left: { cx: 146.6, cy: 365.2, rx: 17, ry: 34 },
-      right: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 }, // swapped with #5
+      right: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 },
     },
   },
   {
-    sensorNum: 11,
+    pinNumber: 6,
+    sensorNum: 6,
     arrayIndex: 5,
-    name: "Midfoot Center",
+    name: "Lower Mid Center",
     region: "Midfoot",
     side: "Central",
     coords: {
@@ -154,35 +168,38 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     },
   },
   {
-    sensorNum: 5,
-    arrayIndex: 11,
-    name: "Midfoot Right",
+    pinNumber: 3,
+    sensorNum: 3,
+    arrayIndex: 2,
+    name: "Lower Mid Medial",
     region: "Midfoot",
     side: "Medial",
     coords: {
       left: { cx: 256.7, cy: 369.3, rx: 19, ry: 34 },
-      right: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 }, // swapped with #16
+      right: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 },
     },
   },
 
   // ==========================================
-  // ROW 5: HEEL-LEAD
+  // ROW 5: ARCH / HEEL-LEAD
   // ==========================================
   {
-    sensorNum: 8,
-    arrayIndex: 8,
-    name: "Heel-Lead Left",
+    pinNumber: 18,
+    sensorNum: 18,
+    arrayIndex: 14,
+    name: "Arch Lateral",
     region: "Midfoot",
     side: "Lateral",
     coords: {
       left: { cx: 152.1, cy: 456.9, rx: 14, ry: 34 },
-      right: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 }, // swapped with #13
+      right: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 },
     },
   },
   {
-    sensorNum: 7,
-    arrayIndex: 9,
-    name: "Heel-Lead Center",
+    pinNumber: 8,
+    sensorNum: 8,
+    arrayIndex: 6,
+    name: "Arch Center",
     region: "Midfoot",
     side: "Central",
     coords: {
@@ -191,14 +208,15 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     },
   },
   {
-    sensorNum: 13,
+    pinNumber: 4,
+    sensorNum: 4,
     arrayIndex: 3,
-    name: "Heel-Lead Right",
+    name: "Arch Medial",
     region: "Midfoot",
     side: "Medial",
     coords: {
       left: { cx: 241.3, cy: 459.1, rx: 17, ry: 34 },
-      right: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 }, // swapped with #8
+      right: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 },
     },
   },
 
@@ -206,37 +224,68 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
   // ROW 6: HEEL
   // ==========================================
   {
-    sensorNum: 4,
+    pinNumber: 16,
+    sensorNum: 16,
     arrayIndex: 12,
-    name: "Heel Left",
+    name: "Heel Lateral",
     region: "Heel",
     side: "Lateral",
     coords: {
       left: { cx: 160.3, cy: 571.2, rx: 16, ry: 45 },
-      right: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 }, // swapped with #12
+      right: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 },
     },
   },
   {
-    sensorNum: 12,
-    arrayIndex: 4,
-    name: "Heel Right",
+    pinNumber: 17,
+    sensorNum: 17,
+    arrayIndex: 13,
+    name: "Heel Medial",
     region: "Heel",
     side: "Medial",
     coords: {
       left: { cx: 227.5, cy: 566.9, rx: 19, ry: 45 },
-      right: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 }, // swapped with #4
+      right: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 },
     },
   },
 ];
 
 /**
- * Returns raw FSR value for a given sensor number (1 to 16)
- * Array is ordered [16..1], so fsr[0]=16, fsr[15]=1
+ * Fast lookup from Insole Pin Number to ESP32 payload array index (0..15)
  */
-export function getSensorValue(fsr: number[], sensorNum: number): number {
-  const index = 16 - sensorNum;
-  if (!fsr || index < 0 || index >= fsr.length) return 0;
-  return fsr[index] || 0;
+export const PIN_TO_ARRAY_INDEX: Record<number, number> = {
+  1: 0,
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 5,
+  8: 6,
+  9: 7,
+  11: 8,
+  12: 9,
+  13: 10,
+  14: 11,
+  16: 12,
+  17: 13,
+  18: 14,
+  19: 15,
+};
+
+/**
+ * Returns raw FSR value for a given insole pin number or array index
+ */
+export function getSensorValue(fsr: number[], pinOrIndex: number): number {
+  if (!fsr || !Array.isArray(fsr)) return 0;
+  // If pin number is given (e.g. 1, 2, 12, 19)
+  const idx = PIN_TO_ARRAY_INDEX[pinOrIndex];
+  if (idx !== undefined && idx >= 0 && idx < fsr.length) {
+    return fsr[idx] || 0;
+  }
+  // Direct array index fallback (0..15)
+  if (pinOrIndex >= 0 && pinOrIndex < fsr.length) {
+    return fsr[pinOrIndex] || 0;
+  }
+  return 0;
 }
 
 /**

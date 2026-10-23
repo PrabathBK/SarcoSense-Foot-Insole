@@ -85,7 +85,7 @@ export function DualFootView() {
           {selectedSensor ? (
             <div>
               <span className="font-semibold text-slate-100">
-                {selectedSensor.foot === "left" ? "Left" : "Right"} Foot Sensor #{selectedSensor.info.sensorNum}:
+                {selectedSensor.foot === "left" ? "Left" : "Right"} Insole Pin #{selectedSensor.info.pinNumber}:
               </span>{" "}
               <span className="text-cyan-400 font-medium">{selectedSensor.info.name}</span> ({selectedSensor.info.region} • {selectedSensor.info.side}) — Value:{" "}
               <strong className="font-mono text-emerald-400">

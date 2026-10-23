@@ -104,7 +104,7 @@ export function SensorTable() {
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-900/90 text-slate-400 text-[11px] uppercase tracking-wider border-b border-slate-800">
             <tr>
-              <th className="py-2.5 px-3">Sensor</th>
+              <th className="py-2.5 px-3">Insole Pin</th>
               <th className="py-2.5 px-3">Array Index</th>
               <th className="py-2.5 px-3">Anatomical Region</th>
               <th className="py-2.5 px-3">Side</th>
