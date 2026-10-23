@@ -200,7 +200,7 @@ PlatformIO compiles all dependencies (`PubSubClient`, `Adafruit MPU6050`, `Wire`
 2. Install required libraries from `Library Manager`:
    - `PubSubClient` (by Nick O'Leary)
    - `Adafruit MPU6050` & `Adafruit Unified Sensor`
-3. Open [`ESP32/main/main.ino`](file:///Users/prabathwijethilaka/Downloads/Sarcopenia/ESP32/main/main.ino).
+3. Open [`ESP32/src/main.ino`](file:///Users/prabathwijethilaka/Downloads/Sarcopenia/ESP32/src/main.ino).
 4. Under `Tools` -> `Board`, select **ESP32 Dev Module**.
 5. Select your active COM/Serial Port under `Tools` -> `Port`.
 6. Click **Upload** (hold `BOOT` button if the uploader hangs on `Connecting......._____`).
