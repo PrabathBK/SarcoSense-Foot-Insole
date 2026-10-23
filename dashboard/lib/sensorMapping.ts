@@ -2,255 +2,33 @@ import { FootSide } from "@/types";
 
 export interface SensorPadInfo {
   pinNumber: number; // Insole Pin number: 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19
-  sensorNum: number; // Alias to pinNumber for backward compatibility
+  sensorNum: number; // Alias to pinNumber
   arrayIndex: number; // 0 to 15 (position in ESP32 JSON payload "fsr" array)
   name: string;
   region: "Toe" | "Forefoot" | "Midfoot" | "Heel";
   side: "Medial" | "Central" | "Lateral";
-  // SVG coordinates on the 737x721 canvas
   coords: {
     left: { cx: number; cy: number; rx: number; ry: number };
     right: { cx: number; cy: number; rx: number; ry: number };
   };
 }
 
-/**
- * 20-PIN CONNECTOR INSOLE SENSOR MAPPING
- * 
- * Active insole pins: [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
- * (Pins 7, 10, 15, 20 are unused / reference lines).
- * 
- * ESP32 publishes fsr array sorted strictly by insole pin number (1 to 19):
- * fsr[0]=Pin 1, fsr[1]=Pin 2, ..., fsr[15]=Pin 19.
- * 
- * Physical Insole Layout (Right foot perspective, Row by Row):
- * Row 1 (Toes):            Pin 11 (Lesser Toe),             Pin 12 (Big Toe)
- * Row 2 (Metatarsals):     Pin 13 (Lateral), Pin 9 (Center), Pin 1 (Medial)
- * Row 3 (Forefoot-Mid):    Pin 14 (Lateral), Pin 5 (Center), Pin 2 (Medial)
- * Row 4 (Lower Mid Arch):  Pin 19 (Lateral), Pin 6 (Center), Pin 3 (Medial)
- * Row 5 (Arch / Heel-Lead):Pin 18 (Lateral), Pin 8 (Center), Pin 4 (Medial)
- * Row 6 (Heel):            Pin 16 (Lateral),                Pin 17 (Medial)
- */
-export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
-  // ==========================================
-  // ROW 1: TOES
-  // ==========================================
-  {
-    pinNumber: 11,
-    sensorNum: 11,
-    arrayIndex: 8,
-    name: "Lesser Toe",
-    region: "Toe",
-    side: "Lateral",
-    coords: {
-      left: { cx: 203.9, cy: 94.5, rx: 28, ry: 32 },
-      right: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 },
-    },
-  },
-  {
-    pinNumber: 12,
-    sensorNum: 12,
-    arrayIndex: 9,
-    name: "Big Toe",
-    region: "Toe",
-    side: "Medial",
-    coords: {
-      left: { cx: 274.0, cy: 100.0, rx: 20, ry: 33 },
-      right: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 },
-    },
-  },
-
-  // ==========================================
-  // ROW 2: METATARSALS / FOREFOOT
-  // ==========================================
-  {
-    pinNumber: 13,
-    sensorNum: 13,
-    arrayIndex: 10,
-    name: "Forefoot Lateral",
-    region: "Forefoot",
-    side: "Lateral",
-    coords: {
-      left: { cx: 157.7, cy: 181.0, rx: 23, ry: 34 },
-      right: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 },
-    },
-  },
-  {
-    pinNumber: 9,
-    sensorNum: 9,
-    arrayIndex: 7,
-    name: "Forefoot Center",
-    region: "Forefoot",
-    side: "Central",
-    coords: {
-      left: { cx: 220.8, cy: 180.7, rx: 21, ry: 35 },
-      right: { cx: 523.3, cy: 180.5, rx: 21, ry: 35 },
-    },
-  },
-  {
-    pinNumber: 1,
-    sensorNum: 1,
-    arrayIndex: 0,
-    name: "Forefoot Medial",
-    region: "Forefoot",
-    side: "Medial",
-    coords: {
-      left: { cx: 281.9, cy: 184.4, rx: 17, ry: 33 },
-      right: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 },
-    },
-  },
-
-  // ==========================================
-  // ROW 3: FOREFOOT-MIDFOOT
-  // ==========================================
-  {
-    pinNumber: 14,
-    sensorNum: 14,
-    arrayIndex: 11,
-    name: "Midfoot Lateral",
-    region: "Forefoot",
-    side: "Lateral",
-    coords: {
-      left: { cx: 142.9, cy: 272.1, rx: 15, ry: 34 },
-      right: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 },
-    },
-  },
-  {
-    pinNumber: 5,
-    sensorNum: 5,
-    arrayIndex: 4,
-    name: "Midfoot Center",
-    region: "Forefoot",
-    side: "Central",
-    coords: {
-      left: { cx: 205.5, cy: 270.6, rx: 18, ry: 35 },
-      right: { cx: 538.5, cy: 270.6, rx: 18, ry: 35 },
-    },
-  },
-  {
-    pinNumber: 2,
-    sensorNum: 2,
-    arrayIndex: 1,
-    name: "Midfoot Medial",
-    region: "Forefoot",
-    side: "Medial",
-    coords: {
-      left: { cx: 273.2, cy: 276.0, rx: 20, ry: 35 },
-      right: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 },
-    },
-  },
-
-  // ==========================================
-  // ROW 4: LOWER MIDFOOT ARCH
-  // ==========================================
-  {
-    pinNumber: 19,
-    sensorNum: 19,
-    arrayIndex: 15,
-    name: "Lower Mid Lateral",
-    region: "Midfoot",
-    side: "Lateral",
-    coords: {
-      left: { cx: 146.6, cy: 365.2, rx: 17, ry: 34 },
-      right: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 },
-    },
-  },
-  {
-    pinNumber: 6,
-    sensorNum: 6,
-    arrayIndex: 5,
-    name: "Lower Mid Center",
-    region: "Midfoot",
-    side: "Central",
-    coords: {
-      left: { cx: 198.4, cy: 365.0, rx: 16, ry: 34 },
-      right: { cx: 546.7, cy: 364.8, rx: 16, ry: 34 },
-    },
-  },
-  {
-    pinNumber: 3,
-    sensorNum: 3,
-    arrayIndex: 2,
-    name: "Lower Mid Medial",
-    region: "Midfoot",
-    side: "Medial",
-    coords: {
-      left: { cx: 256.7, cy: 369.3, rx: 19, ry: 34 },
-      right: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 },
-    },
-  },
-
-  // ==========================================
-  // ROW 5: ARCH / HEEL-LEAD
-  // ==========================================
-  {
-    pinNumber: 18,
-    sensorNum: 18,
-    arrayIndex: 14,
-    name: "Arch Lateral",
-    region: "Midfoot",
-    side: "Lateral",
-    coords: {
-      left: { cx: 152.1, cy: 456.9, rx: 14, ry: 34 },
-      right: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 },
-    },
-  },
-  {
-    pinNumber: 8,
-    sensorNum: 8,
-    arrayIndex: 6,
-    name: "Arch Center",
-    region: "Midfoot",
-    side: "Central",
-    coords: {
-      left: { cx: 192.0, cy: 457.3, rx: 15, ry: 35 },
-      right: { cx: 552.1, cy: 456.5, rx: 15, ry: 35 },
-    },
-  },
-  {
-    pinNumber: 4,
-    sensorNum: 4,
-    arrayIndex: 3,
-    name: "Arch Medial",
-    region: "Midfoot",
-    side: "Medial",
-    coords: {
-      left: { cx: 241.3, cy: 459.1, rx: 17, ry: 34 },
-      right: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 },
-    },
-  },
-
-  // ==========================================
-  // ROW 6: HEEL
-  // ==========================================
-  {
-    pinNumber: 16,
-    sensorNum: 16,
-    arrayIndex: 12,
-    name: "Heel Lateral",
-    region: "Heel",
-    side: "Lateral",
-    coords: {
-      left: { cx: 160.3, cy: 571.2, rx: 16, ry: 45 },
-      right: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 },
-    },
-  },
-  {
-    pinNumber: 17,
-    sensorNum: 17,
-    arrayIndex: 13,
-    name: "Heel Medial",
-    region: "Heel",
-    side: "Medial",
-    coords: {
-      left: { cx: 227.5, cy: 566.9, rx: 19, ry: 45 },
-      right: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 },
-    },
-  },
-];
+export interface FootPadDisplayInfo {
+  padId: string;
+  pinNumber: number;
+  sensorNum: number;
+  arrayIndex: number;
+  name: string;
+  region: "Toe" | "Forefoot" | "Midfoot" | "Heel";
+  side: "Medial" | "Central" | "Lateral";
+  coords: { cx: number; cy: number; rx: number; ry: number };
+}
 
 /**
  * Fast lookup from Insole Pin Number to ESP32 payload array index (0..15)
+ * ESP32 publishes fsr in ascending Pin order:
+ * [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
+ * Note: Pin 11 = Big Toe (C14), Pin 12 = Lesser Toe (C6)
  */
 export const PIN_TO_ARRAY_INDEX: Record<number, number> = {
   1: 0,
@@ -276,17 +54,397 @@ export const PIN_TO_ARRAY_INDEX: Record<number, number> = {
  */
 export function getSensorValue(fsr: number[], pinOrIndex: number): number {
   if (!fsr || !Array.isArray(fsr)) return 0;
-  // If pin number is given (e.g. 1, 2, 12, 19)
   const idx = PIN_TO_ARRAY_INDEX[pinOrIndex];
   if (idx !== undefined && idx >= 0 && idx < fsr.length) {
     return fsr[idx] || 0;
   }
-  // Direct array index fallback (0..15)
+  // Fallback to direct array index (0..15)
   if (pinOrIndex >= 0 && pinOrIndex < fsr.length) {
     return fsr[pinOrIndex] || 0;
   }
   return 0;
 }
+
+/**
+ * RIGHT FOOT PADS (Baseline Master Mapping)
+ * 
+ * Row 1 (Toes):            Pin 12 (Left),                Pin 11 (Right)
+ * Row 2 (Metatarsals):     Pin 13 (Left), Pin 9 (Center), Pin 1 (Right)
+ * Row 3 (Midfoot):         Pin 14 (Left), Pin 5 (Center), Pin 2 (Right)
+ * Row 4 (Lower Mid Arch):  Pin 19 (Left), Pin 6 (Center), Pin 3 (Right)
+ * Row 5 (Arch):            Pin 18 (Left), Pin 8 (Center), Pin 4 (Right)
+ * Row 6 (Heel):            Pin 16 (Left),                Pin 17 (Right)
+ */
+const RIGHT_FOOT_PADS: FootPadDisplayInfo[] = [
+  // Row 1
+  {
+    padId: "r_row1_left",
+    pinNumber: 12,
+    sensorNum: 12,
+    arrayIndex: 9,
+    name: "Lesser Toe (Row 1 Left)",
+    region: "Toe",
+    side: "Lateral",
+    coords: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 },
+  },
+  {
+    padId: "r_row1_right",
+    pinNumber: 11,
+    sensorNum: 11,
+    arrayIndex: 8,
+    name: "Big Toe (Row 1 Right)",
+    region: "Toe",
+    side: "Medial",
+    coords: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 },
+  },
+  // Row 2
+  {
+    padId: "r_row2_left",
+    pinNumber: 13,
+    sensorNum: 13,
+    arrayIndex: 10,
+    name: "Forefoot Lateral (Row 2 Left)",
+    region: "Forefoot",
+    side: "Lateral",
+    coords: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 },
+  },
+  {
+    padId: "r_row2_mid",
+    pinNumber: 9,
+    sensorNum: 9,
+    arrayIndex: 7,
+    name: "Forefoot Center (Row 2 Mid)",
+    region: "Forefoot",
+    side: "Central",
+    coords: { cx: 523.3, cy: 180.5, rx: 21, ry: 35 },
+  },
+  {
+    padId: "r_row2_right",
+    pinNumber: 1,
+    sensorNum: 1,
+    arrayIndex: 0,
+    name: "Forefoot Medial (Row 2 Right)",
+    region: "Forefoot",
+    side: "Medial",
+    coords: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 },
+  },
+  // Row 3
+  {
+    padId: "r_row3_left",
+    pinNumber: 14,
+    sensorNum: 14,
+    arrayIndex: 11,
+    name: "Midfoot Lateral (Row 3 Left)",
+    region: "Forefoot",
+    side: "Lateral",
+    coords: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 },
+  },
+  {
+    padId: "r_row3_mid",
+    pinNumber: 5,
+    sensorNum: 5,
+    arrayIndex: 4,
+    name: "Midfoot Center (Row 3 Mid)",
+    region: "Forefoot",
+    side: "Central",
+    coords: { cx: 538.5, cy: 270.6, rx: 18, ry: 35 },
+  },
+  {
+    padId: "r_row3_right",
+    pinNumber: 2,
+    sensorNum: 2,
+    arrayIndex: 1,
+    name: "Midfoot Medial (Row 3 Right)",
+    region: "Forefoot",
+    side: "Medial",
+    coords: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 },
+  },
+  // Row 4
+  {
+    padId: "r_row4_left",
+    pinNumber: 19,
+    sensorNum: 19,
+    arrayIndex: 15,
+    name: "Lower Mid Lateral (Row 4 Left)",
+    region: "Midfoot",
+    side: "Lateral",
+    coords: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 },
+  },
+  {
+    padId: "r_row4_mid",
+    pinNumber: 6,
+    sensorNum: 6,
+    arrayIndex: 5,
+    name: "Lower Mid Center (Row 4 Mid)",
+    region: "Midfoot",
+    side: "Central",
+    coords: { cx: 546.7, cy: 364.8, rx: 16, ry: 34 },
+  },
+  {
+    padId: "r_row4_right",
+    pinNumber: 3,
+    sensorNum: 3,
+    arrayIndex: 2,
+    name: "Lower Mid Medial (Row 4 Right)",
+    region: "Midfoot",
+    side: "Medial",
+    coords: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 },
+  },
+  // Row 5
+  {
+    padId: "r_row5_left",
+    pinNumber: 18,
+    sensorNum: 18,
+    arrayIndex: 14,
+    name: "Arch Lateral (Row 5 Left)",
+    region: "Midfoot",
+    side: "Lateral",
+    coords: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 },
+  },
+  {
+    padId: "r_row5_mid",
+    pinNumber: 8,
+    sensorNum: 8,
+    arrayIndex: 6,
+    name: "Arch Center (Row 5 Mid)",
+    region: "Midfoot",
+    side: "Central",
+    coords: { cx: 552.1, cy: 456.5, rx: 15, ry: 35 },
+  },
+  {
+    padId: "r_row5_right",
+    pinNumber: 4,
+    sensorNum: 4,
+    arrayIndex: 3,
+    name: "Arch Medial (Row 5 Right)",
+    region: "Midfoot",
+    side: "Medial",
+    coords: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 },
+  },
+  // Row 6
+  {
+    padId: "r_row6_left",
+    pinNumber: 16,
+    sensorNum: 16,
+    arrayIndex: 12,
+    name: "Heel Lateral (Row 6 Left)",
+    region: "Heel",
+    side: "Lateral",
+    coords: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 },
+  },
+  {
+    padId: "r_row6_right",
+    pinNumber: 17,
+    sensorNum: 17,
+    arrayIndex: 13,
+    name: "Heel Medial (Row 6 Right)",
+    region: "Heel",
+    side: "Medial",
+    coords: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 },
+  },
+];
+
+/**
+ * LEFT FOOT PADS (Swapped horizontally in dashboard)
+ * 
+ * Row 1 (Toes):            Pin 11 (Left),                Pin 12 (Right)
+ * Row 2 (Metatarsals):     Pin 1 (Left),  Pin 9 (Center), Pin 13 (Right)
+ * Row 3 (Midfoot):         Pin 2 (Left),  Pin 5 (Center), Pin 14 (Right)
+ * Row 4 (Lower Mid Arch):  Pin 3 (Left),  Pin 6 (Center), Pin 19 (Right)
+ * Row 5 (Arch):            Pin 4 (Left),  Pin 8 (Center), Pin 18 (Right)
+ * Row 6 (Heel):            Pin 17 (Left),                Pin 16 (Right)
+ */
+const LEFT_FOOT_PADS: FootPadDisplayInfo[] = [
+  // Row 1
+  {
+    padId: "l_row1_left",
+    pinNumber: 11,
+    sensorNum: 11,
+    arrayIndex: 8,
+    name: "Big Toe (Row 1 Left)",
+    region: "Toe",
+    side: "Medial",
+    coords: { cx: 203.9, cy: 94.5, rx: 28, ry: 32 },
+  },
+  {
+    padId: "l_row1_right",
+    pinNumber: 12,
+    sensorNum: 12,
+    arrayIndex: 9,
+    name: "Lesser Toe (Row 1 Right)",
+    region: "Toe",
+    side: "Lateral",
+    coords: { cx: 274.0, cy: 100.0, rx: 20, ry: 33 },
+  },
+  // Row 2
+  {
+    padId: "l_row2_left",
+    pinNumber: 1,
+    sensorNum: 1,
+    arrayIndex: 0,
+    name: "Forefoot Medial (Row 2 Left)",
+    region: "Forefoot",
+    side: "Medial",
+    coords: { cx: 157.7, cy: 181.0, rx: 23, ry: 34 },
+  },
+  {
+    padId: "l_row2_mid",
+    pinNumber: 9,
+    sensorNum: 9,
+    arrayIndex: 7,
+    name: "Forefoot Center (Row 2 Mid)",
+    region: "Forefoot",
+    side: "Central",
+    coords: { cx: 220.8, cy: 180.7, rx: 21, ry: 35 },
+  },
+  {
+    padId: "l_row2_right",
+    pinNumber: 13,
+    sensorNum: 13,
+    arrayIndex: 10,
+    name: "Forefoot Lateral (Row 2 Right)",
+    region: "Forefoot",
+    side: "Lateral",
+    coords: { cx: 281.9, cy: 184.4, rx: 17, ry: 33 },
+  },
+  // Row 3
+  {
+    padId: "l_row3_left",
+    pinNumber: 2,
+    sensorNum: 2,
+    arrayIndex: 1,
+    name: "Midfoot Medial (Row 3 Left)",
+    region: "Forefoot",
+    side: "Medial",
+    coords: { cx: 142.9, cy: 272.1, rx: 15, ry: 34 },
+  },
+  {
+    padId: "l_row3_mid",
+    pinNumber: 5,
+    sensorNum: 5,
+    arrayIndex: 4,
+    name: "Midfoot Center (Row 3 Mid)",
+    region: "Forefoot",
+    side: "Central",
+    coords: { cx: 205.5, cy: 270.6, rx: 18, ry: 35 },
+  },
+  {
+    padId: "l_row3_right",
+    pinNumber: 14,
+    sensorNum: 14,
+    arrayIndex: 11,
+    name: "Midfoot Lateral (Row 3 Right)",
+    region: "Forefoot",
+    side: "Lateral",
+    coords: { cx: 273.2, cy: 276.0, rx: 20, ry: 35 },
+  },
+  // Row 4
+  {
+    padId: "l_row4_left",
+    pinNumber: 3,
+    sensorNum: 3,
+    arrayIndex: 2,
+    name: "Lower Mid Medial (Row 4 Left)",
+    region: "Midfoot",
+    side: "Medial",
+    coords: { cx: 146.6, cy: 365.2, rx: 17, ry: 34 },
+  },
+  {
+    padId: "l_row4_mid",
+    pinNumber: 6,
+    sensorNum: 6,
+    arrayIndex: 5,
+    name: "Lower Mid Center (Row 4 Mid)",
+    region: "Midfoot",
+    side: "Central",
+    coords: { cx: 198.4, cy: 365.0, rx: 16, ry: 34 },
+  },
+  {
+    padId: "l_row4_right",
+    pinNumber: 19,
+    sensorNum: 19,
+    arrayIndex: 15,
+    name: "Lower Mid Lateral (Row 4 Right)",
+    region: "Midfoot",
+    side: "Lateral",
+    coords: { cx: 256.7, cy: 369.3, rx: 19, ry: 34 },
+  },
+  // Row 5
+  {
+    padId: "l_row5_left",
+    pinNumber: 4,
+    sensorNum: 4,
+    arrayIndex: 3,
+    name: "Arch Medial (Row 5 Left)",
+    region: "Midfoot",
+    side: "Medial",
+    coords: { cx: 152.1, cy: 456.9, rx: 14, ry: 34 },
+  },
+  {
+    padId: "l_row5_mid",
+    pinNumber: 8,
+    sensorNum: 8,
+    arrayIndex: 6,
+    name: "Arch Center (Row 5 Mid)",
+    region: "Midfoot",
+    side: "Central",
+    coords: { cx: 192.0, cy: 457.3, rx: 15, ry: 35 },
+  },
+  {
+    padId: "l_row5_right",
+    pinNumber: 18,
+    sensorNum: 18,
+    arrayIndex: 14,
+    name: "Arch Lateral (Row 5 Right)",
+    region: "Midfoot",
+    side: "Lateral",
+    coords: { cx: 241.3, cy: 459.1, rx: 17, ry: 34 },
+  },
+  // Row 6
+  {
+    padId: "l_row6_left",
+    pinNumber: 17,
+    sensorNum: 17,
+    arrayIndex: 13,
+    name: "Heel Medial (Row 6 Left)",
+    region: "Heel",
+    side: "Medial",
+    coords: { cx: 160.3, cy: 571.2, rx: 16, ry: 45 },
+  },
+  {
+    padId: "l_row6_right",
+    pinNumber: 16,
+    sensorNum: 16,
+    arrayIndex: 12,
+    name: "Heel Lateral (Row 6 Right)",
+    region: "Heel",
+    side: "Lateral",
+    coords: { cx: 227.5, cy: 566.9, rx: 19, ry: 45 },
+  },
+];
+
+/**
+ * Returns the exact 16 pads for the chosen foot side
+ */
+export function getFootPads(foot: FootSide): FootPadDisplayInfo[] {
+  return foot === "left" ? LEFT_FOOT_PADS : RIGHT_FOOT_PADS;
+}
+
+/**
+ * Backward compatibility export
+ */
+export const SENSOR_DEFINITIONS: SensorPadInfo[] = RIGHT_FOOT_PADS.map((pad, idx) => ({
+  pinNumber: pad.pinNumber,
+  sensorNum: pad.pinNumber,
+  arrayIndex: pad.arrayIndex,
+  name: pad.name,
+  region: pad.region,
+  side: pad.side,
+  coords: {
+    right: pad.coords,
+    left: LEFT_FOOT_PADS[idx].coords,
+  },
+}));
 
 /**
  * Maps raw ADC value (0-4095) to heat map colors

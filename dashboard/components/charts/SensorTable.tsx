@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useSensorStore } from "@/store/sensorStore";
 import { FootSide } from "@/types";
-import { SENSOR_DEFINITIONS, getSensorValue, getPressureStyle } from "@/lib/sensorMapping";
+import { getFootPads, getSensorValue, getPressureStyle } from "@/lib/sensorMapping";
 import { Table, Footprints, Flame, BarChart2 } from "lucide-react";
 
 export function SensorTable() {
@@ -11,26 +11,28 @@ export function SensorTable() {
   const fsr = useSensorStore((s) => s[selectedFoot].fsr);
   const isConnected = useSensorStore((s) => s[selectedFoot].connected);
 
+  const footPads = getFootPads(selectedFoot);
+
   // Compute stats
   let maxVal = 0;
   let maxSensorNum = 1;
   let activeCount = 0;
   let sumVal = 0;
 
-  SENSOR_DEFINITIONS.forEach((s) => {
-    const val = getSensorValue(fsr, s.sensorNum);
+  footPads.forEach((s) => {
+    const val = getSensorValue(fsr, s.pinNumber);
     sumVal += val;
     if (val > 50) activeCount++;
     if (val > maxVal) {
       maxVal = val;
-      maxSensorNum = s.sensorNum;
+      maxSensorNum = s.pinNumber;
     }
   });
 
   const avgVal = Math.round(sumVal / 16);
 
-  // Sort sensors by sensorNum (1 to 16)
-  const sortedSensors = [...SENSOR_DEFINITIONS].sort((a, b) => a.sensorNum - b.sensorNum);
+  // Sort sensors by pinNumber (1 to 19)
+  const sortedSensors = [...footPads].sort((a, b) => a.pinNumber - b.pinNumber);
 
   return (
     <div className="flex flex-col gap-4 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 md:p-5 shadow-xl backdrop-blur-md">

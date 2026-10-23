@@ -51,8 +51,8 @@ const int SIG = 34;
 // Mapping of 16 active insole pins to CD74HC4067 MUX channels
 // Ordered by Pin Number: [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19]
 // Pin 1->C15, Pin 2->C7, Pin 3->C11, Pin 4->C3, Pin 5->C13, Pin 6->C5, Pin 8->C9, Pin 9->C1,
-// Pin 11->C6, Pin 12->C14, Pin 13->C10, Pin 14->C2, Pin 16->C12, Pin 17->C4, Pin 18->C8, Pin 19->C0
-const byte PIN_CHANNELS[16] = {15, 7, 11, 3, 13, 5, 9, 1, 6, 14, 10, 2, 12, 4, 8, 0};
+// Pin 11->C14 (Big Toe), Pin 12->C6 (Lesser Toe), Pin 13->C10, Pin 14->C2, Pin 16->C12, Pin 17->C4, Pin 18->C8, Pin 19->C0
+const byte PIN_CHANNELS[16] = {15, 7, 11, 3, 13, 5, 9, 1, 14, 6, 10, 2, 12, 4, 8, 0};
 
 int fsrValues[16];
 

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { FootHeatmap } from "./FootHeatmap";
 import { useSensorStore } from "@/store/sensorStore";
-import { SensorPadInfo, getSensorValue } from "@/lib/sensorMapping";
+import { FootPadDisplayInfo, getSensorValue } from "@/lib/sensorMapping";
 import { Info, Gauge } from "lucide-react";
 
 export function DualFootView() {
@@ -12,7 +12,7 @@ export function DualFootView() {
 
   const [selectedSensor, setSelectedSensor] = useState<{
     foot: "left" | "right";
-    info: SensorPadInfo;
+    info: FootPadDisplayInfo;
   } | null>(null);
 
   // Compute bilateral weight distribution
