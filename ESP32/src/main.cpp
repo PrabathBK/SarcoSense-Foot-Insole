@@ -102,7 +102,14 @@ void loop() {
   // ======================
   for (int channel = 0; channel < 16; channel++) {
     selectChannel(channel);
-    delayMicroseconds(20);
+    // Allow MUX output to settle before sampling:
+    // 20µs was too short — C9/C1 and C14/C6 pairs differ only in S3,
+    // causing ADC to read residual charge from the previous channel.
+    // 500µs ensures full RC settling on the SIG line (16 × 500µs = 8ms << 50ms loop).
+    delayMicroseconds(500);
+    // Dummy read to flush ADC sample-and-hold capacitor from previous channel
+    analogRead(SIG);
+    delayMicroseconds(100);
     fsrValues[channel] = analogRead(SIG);
   }
 
