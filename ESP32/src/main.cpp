@@ -12,7 +12,7 @@ Adafruit_MPU6050 mpu;
 // Insole Configuration
 // ===========================
 // Set to "right" or "left" depending on which insole this firmware is flashed to:
-#define FOOT_SIDE "left"
+#define FOOT_SIDE "right"
 
 // ===========================
 // Forward Declarations
