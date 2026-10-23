@@ -113,10 +113,11 @@ void loop() {
   payload += "\"foot\":\"" FOOT_SIDE "\",";
   payload += "\"ts\":" + String(millis()) + ",";
 
+  
   payload += "\"fsr\":[";
-  for (int i = 0; i < 16; i++) {
+  for (int i = 15; i >= 0; i--) {
     payload += String(fsrValues[i]);
-    if (i < 15)
+    if (i > 0)
       payload += ",";
   }
   payload += "],";
