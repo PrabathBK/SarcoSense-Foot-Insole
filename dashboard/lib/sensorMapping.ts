@@ -38,8 +38,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Toe",
     side: "Lateral",
     coords: {
-      left: { cx: 203.9, cy: 94.5, rx: 28, ry: 32 },
-      right: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 }, // swapped with #2
+      left: { cx: 274.0, cy: 100.0, rx: 20, ry: 33 }, // swapped with #2 on left insole
+      right: { cx: 471.0, cy: 100.3, rx: 20, ry: 33 },
     },
   },
   {
@@ -49,8 +49,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Toe",
     side: "Medial",
     coords: {
-      left: { cx: 274.0, cy: 100.0, rx: 20, ry: 33 },
-      right: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 }, // swapped with #10
+      left: { cx: 203.9, cy: 94.5, rx: 28, ry: 32 }, // swapped with #10 on left insole
+      right: { cx: 539.7, cy: 95.8, rx: 28, ry: 32 },
     },
   },
 
@@ -64,8 +64,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Forefoot",
     side: "Lateral",
     coords: {
-      left: { cx: 157.7, cy: 181.0, rx: 23, ry: 34 },
-      right: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 }, // swapped with #1
+      left: { cx: 281.9, cy: 184.4, rx: 17, ry: 33 }, // swapped with #1 on left insole
+      right: { cx: 462.6, cy: 183.6, rx: 17, ry: 33 },
     },
   },
   {
@@ -86,8 +86,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Forefoot",
     side: "Medial",
     coords: {
-      left: { cx: 281.9, cy: 184.4, rx: 17, ry: 33 },
-      right: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 }, // swapped with #6
+      left: { cx: 157.7, cy: 181.0, rx: 23, ry: 34 }, // swapped with #6 on left insole
+      right: { cx: 587.6, cy: 180.1, rx: 23, ry: 34 },
     },
   },
 
@@ -101,8 +101,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Forefoot",
     side: "Lateral",
     coords: {
-      left: { cx: 142.9, cy: 272.1, rx: 15, ry: 34 },
-      right: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 }, // swapped with #9
+      left: { cx: 273.2, cy: 276.0, rx: 20, ry: 35 }, // swapped with #9 on left insole
+      right: { cx: 471.6, cy: 275.8, rx: 20, ry: 35 },
     },
   },
   {
@@ -123,8 +123,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Forefoot",
     side: "Medial",
     coords: {
-      left: { cx: 273.2, cy: 276.0, rx: 20, ry: 35 },
-      right: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 }, // swapped with #14
+      left: { cx: 142.9, cy: 272.1, rx: 15, ry: 34 }, // swapped with #14 on left insole
+      right: { cx: 600.9, cy: 272.0, rx: 15, ry: 34 },
     },
   },
 
@@ -138,8 +138,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Midfoot",
     side: "Lateral",
     coords: {
-      left: { cx: 146.6, cy: 365.2, rx: 17, ry: 34 },
-      right: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 }, // swapped with #5
+      left: { cx: 256.7, cy: 369.3, rx: 19, ry: 34 }, // swapped with #5 on left insole
+      right: { cx: 487.9, cy: 369.2, rx: 19, ry: 34 },
     },
   },
   {
@@ -160,8 +160,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Midfoot",
     side: "Medial",
     coords: {
-      left: { cx: 256.7, cy: 369.3, rx: 19, ry: 34 },
-      right: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 }, // swapped with #16
+      left: { cx: 146.6, cy: 365.2, rx: 17, ry: 34 }, // swapped with #16 on left insole
+      right: { cx: 597.7, cy: 365.3, rx: 17, ry: 34 },
     },
   },
 
@@ -175,8 +175,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Midfoot",
     side: "Lateral",
     coords: {
-      left: { cx: 152.1, cy: 456.9, rx: 14, ry: 34 },
-      right: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 }, // swapped with #13
+      left: { cx: 241.3, cy: 459.1, rx: 17, ry: 34 }, // swapped with #13 on left insole
+      right: { cx: 501.7, cy: 459.3, rx: 17, ry: 34 },
     },
   },
   {
@@ -197,8 +197,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Midfoot",
     side: "Medial",
     coords: {
-      left: { cx: 241.3, cy: 459.1, rx: 17, ry: 34 },
-      right: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 }, // swapped with #8
+      left: { cx: 152.1, cy: 456.9, rx: 14, ry: 34 }, // swapped with #8 on left insole
+      right: { cx: 592.1, cy: 455.9, rx: 14, ry: 34 },
     },
   },
 
@@ -212,8 +212,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Heel",
     side: "Lateral",
     coords: {
-      left: { cx: 160.3, cy: 571.2, rx: 16, ry: 45 },
-      right: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 }, // swapped with #12
+      left: { cx: 227.5, cy: 566.9, rx: 19, ry: 45 }, // swapped with #12 on left insole
+      right: { cx: 516.1, cy: 567.2, rx: 19, ry: 45 },
     },
   },
   {
@@ -223,8 +223,8 @@ export const SENSOR_DEFINITIONS: SensorPadInfo[] = [
     region: "Heel",
     side: "Medial",
     coords: {
-      left: { cx: 227.5, cy: 566.9, rx: 19, ry: 45 },
-      right: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 }, // swapped with #4
+      left: { cx: 160.3, cy: 571.2, rx: 16, ry: 45 }, // swapped with #4 on left insole
+      right: { cx: 584.2, cy: 570.6, rx: 16, ry: 45 },
     },
   },
 ];
