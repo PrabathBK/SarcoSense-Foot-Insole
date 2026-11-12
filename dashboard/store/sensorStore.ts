@@ -4,7 +4,7 @@ import { FootSide, IMUData, InsoleData, RecordedSample } from "@/types";
 export type BrokerStatus = "disconnected" | "connecting" | "connected" | "error";
 
 export interface FootDataState {
-  fsr: number[]; // 16 values
+  fsr: number[]; // 20 values: index = pin-1, zeros for unused pins 7/10/15/20
   imu: IMUData;
   connected: boolean;
   lastPacketTime: number | null;
@@ -55,7 +55,7 @@ interface SensorStoreState {
 }
 
 const DEFAULT_IMU: IMUData = { ax: 0, ay: 0, az: 0, gx: 0, gy: 0, gz: 0 };
-const DEFAULT_FSR = Array(16).fill(0);
+const DEFAULT_FSR = Array(20).fill(0);
 const MAX_HISTORY = 40;
 
 const initialFootState = (): FootDataState => ({

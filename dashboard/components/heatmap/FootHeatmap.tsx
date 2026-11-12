@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { FootSide } from "@/types";
-import { SENSOR_DEFINITIONS, getSensorValue, getPressureStyle, SensorPadInfo } from "@/lib/sensorMapping";
+import { getFootPads, getSensorValue, getPressureStyle, FootPadDisplayInfo } from "@/lib/sensorMapping";
 import { LEFT_FOOT_OUTLINE, RIGHT_FOOT_OUTLINE } from "@/lib/footPaths";
 
 interface FootHeatmapProps {
@@ -12,7 +12,7 @@ interface FootHeatmapProps {
   sampleRate?: number;
   showLabels?: boolean;
   className?: string;
-  onSelectSensor?: (sensor: SensorPadInfo | null) => void;
+  onSelectSensor?: (sensor: FootPadDisplayInfo | null) => void;
 }
 
 export function FootHeatmap({
@@ -91,18 +91,18 @@ export function FootHeatmap({
           />
 
           {/* Sensor Pads */}
-          {SENSOR_DEFINITIONS.map((sensor) => {
-            const padCoord = sensor.coords[foot];
-            const rawVal = getSensorValue(fsr, sensor.sensorNum);
+          {getFootPads(foot).map((sensor) => {
+            const padCoord = sensor.coords;
+            const rawVal = getSensorValue(fsr, sensor.pinNumber);
             const style = getPressureStyle(rawVal);
-            const isHovered = hoveredSensorNum === sensor.sensorNum;
+            const isHovered = hoveredSensorNum === sensor.pinNumber;
 
             return (
               <g
-                key={`sensor-${foot}-${sensor.sensorNum}`}
+                key={`sensor-${foot}-${sensor.padId}`}
                 className="cursor-pointer transition-all duration-150"
                 onMouseEnter={() => {
-                  setHoveredSensorNum(sensor.sensorNum);
+                  setHoveredSensorNum(sensor.pinNumber);
                   onSelectSensor?.(sensor);
                 }}
                 onMouseLeave={() => {
@@ -148,7 +148,7 @@ export function FootHeatmap({
                     fontFamily="monospace"
                     pointerEvents="none"
                   >
-                    {isHovered ? rawVal : `#${sensor.sensorNum}`}
+                    {isHovered ? rawVal : `#${sensor.pinNumber}`}
                   </text>
                 )}
               </g>
