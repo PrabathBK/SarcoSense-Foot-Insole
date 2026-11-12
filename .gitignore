@@ -21,12 +21,6 @@ build/
 *.hex
 
 # Environment Variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*/.env*.local
 
 # Logs
 npm-debug.log*

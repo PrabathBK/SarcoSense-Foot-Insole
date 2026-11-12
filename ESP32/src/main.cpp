@@ -30,7 +30,7 @@ const char* password = "26262626";
 // ===========================
 // MQTT Settings
 // ===========================
-const char* mqtt_server = "broker.hivemq.com";
+const char* mqtt_server = "192.168.8.107";
 const int mqtt_port = 1883;
 const char* mqtt_topic = "smart_insole/" FOOT_SIDE;
 const char* mqtt_test_topic = "smart_insole/test";
@@ -165,10 +165,12 @@ void loop() {
   payload += "\"foot\":\"" FOOT_SIDE "\",";
   payload += "\"ts\":" + String(millis()) + ",";
 
+  
   payload += "\"fsr\":[";
-  for (int i = 0; i < 20; i++) {
-    payload += String(fsrOut[i]);
-    if (i < 19)
+  for (int i = 15; i >= 0; i--) {
+    payload += String(fsrValues[i]);
+    if (i > 0)
+
       payload += ",";
   }
   payload += "],";
