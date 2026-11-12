@@ -1,5 +1,22 @@
 import { RecordedSample } from "@/types";
 
+/**
+ * Formats a timestamp into Sri Lanka Standard Time (SLST, UTC+05:30)
+ * in readable format: YYYY-MM-DD HH:mm:ss.SSS
+ */
+export function formatSriLankaTime(timestamp: number): string {
+  const slDate = new Date(timestamp + 5.5 * 60 * 60 * 1000);
+  const year = slDate.getUTCFullYear();
+  const month = String(slDate.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(slDate.getUTCDate()).padStart(2, "0");
+  const hours = String(slDate.getUTCHours()).padStart(2, "0");
+  const minutes = String(slDate.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(slDate.getUTCSeconds()).padStart(2, "0");
+  const ms = String(slDate.getUTCMilliseconds()).padStart(3, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${ms}`;
+}
+
 export function exportSessionToCSV(
   samples: RecordedSample[],
   patientId: string,
@@ -12,7 +29,7 @@ export function exportSessionToCSV(
 
   const headers = [
     "timestamp_ms",
-    "iso_time",
+    "local_time_sl",
     "patient_id",
     "patient_name",
     "foot",
@@ -43,7 +60,7 @@ export function exportSessionToCSV(
   const rows: string[] = [headers.join(",")];
 
   samples.forEach((sample) => {
-    const isoTime = new Date(sample.timestamp).toISOString();
+    const slTime = formatSriLankaTime(sample.timestamp);
 
     // If sample has left foot data
     if (sample.left) {
@@ -52,7 +69,7 @@ export function exportSessionToCSV(
       rows.push(
         [
           sample.timestamp,
-          `"${isoTime}"`,
+          `"${slTime}"`,
           `"${patientId}"`,
           `"${patientName.replace(/"/g, '""')}"`,
           "left",
@@ -74,7 +91,7 @@ export function exportSessionToCSV(
       rows.push(
         [
           sample.timestamp,
-          `"${isoTime}"`,
+          `"${slTime}"`,
           `"${patientId}"`,
           `"${patientName.replace(/"/g, '""')}"`,
           "right",
@@ -95,8 +112,8 @@ export function exportSessionToCSV(
   const url = URL.createObjectURL(blob);
 
   const cleanPatientId = patientId.replace(/[^a-zA-Z0-9_-]/g, "_");
-  const timestampStr = new Date().toISOString().replace(/[:.]/g, "-");
-  const fileName = `sarco_gait_${cleanPatientId}_${timestampStr}.csv`;
+  const slNow = formatSriLankaTime(Date.now()).replace(/[:.]/g, "-").replace(" ", "_");
+  const fileName = `sarco_gait_${cleanPatientId}_${slNow}.csv`;
 
   const link = document.createElement("a");
   link.setAttribute("href", url);

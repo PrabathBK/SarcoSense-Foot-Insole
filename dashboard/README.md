@@ -87,7 +87,7 @@ Formula linking incoming array index to sensor numbers: `index = 16 - sensorNumb
 Clicking **"Export CSV"** downloads a timestamped dataset (`sarco_gait_{patientId}_{timestamp}.csv`):
 
 ```csv
-timestamp_ms,iso_time,patient_id,patient_name,foot,fsr_16,fsr_15,...,fsr_1,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z
+timestamp_ms,local_time_sl,patient_id,patient_name,foot,fsr_16,fsr_15,...,fsr_1,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z
 ```
 
 ---
