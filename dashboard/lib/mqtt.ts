@@ -15,9 +15,9 @@ export interface MQTTConfig {
 }
 
 export function getMQTTConfig(): MQTTConfig {
-  const host = process.env.NEXT_PUBLIC_MQTT_HOST || "broker.hivemq.com";
-  const port = process.env.NEXT_PUBLIC_MQTT_PORT || "8884";
-  const protocol = process.env.NEXT_PUBLIC_MQTT_PROTOCOL || "wss";
+  const host = process.env.NEXT_PUBLIC_MQTT_HOST || "localhost";
+  const port = process.env.NEXT_PUBLIC_MQTT_PORT || "8000";
+  const protocol = process.env.NEXT_PUBLIC_MQTT_PROTOCOL || "ws";
   const path = process.env.NEXT_PUBLIC_MQTT_PATH || "/mqtt";
 
   const randomId = Math.random().toString(16).substring(2, 10);
