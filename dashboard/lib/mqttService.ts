@@ -37,7 +37,6 @@ export function initMQTT(): MqttClient | null {
       const topics = [
         config.topics.right,
         config.topics.left,
-        config.topics.test,
       ];
 
       client.subscribe(topics, { qos: 0 }, (err) => {

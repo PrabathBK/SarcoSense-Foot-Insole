@@ -4,6 +4,22 @@ import { useEffect } from "react";
 import { initMQTT, reconnectMQTT } from "@/lib/mqttService";
 import { useSensorStore } from "@/store/sensorStore";
 
+export function useBrokerStatus() {
+  const brokerStatus = useSensorStore((s) => s.brokerStatus);
+  const brokerError = useSensorStore((s) => s.brokerError);
+
+  useEffect(() => {
+    initMQTT();
+  }, []);
+
+  return {
+    brokerStatus,
+    brokerError,
+    isConnected: brokerStatus === "connected",
+    reconnect: reconnectMQTT,
+  };
+}
+
 export function useMQTT() {
   const brokerStatus = useSensorStore((s) => s.brokerStatus);
   const brokerError = useSensorStore((s) => s.brokerError);

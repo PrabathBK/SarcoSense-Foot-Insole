@@ -100,7 +100,7 @@ export function FootHeatmap({
             return (
               <g
                 key={`sensor-${foot}-${sensor.sensorNum}`}
-                className="cursor-pointer transition-all duration-150"
+                className="cursor-pointer"
                 onMouseEnter={() => {
                   setHoveredSensorNum(sensor.sensorNum);
                   onSelectSensor?.(sensor);
@@ -119,7 +119,6 @@ export function FootHeatmap({
                     ry={padCoord.ry + 8}
                     fill={style.fill}
                     opacity="0.3"
-                    className="animate-pulse"
                   />
                 )}
 
@@ -132,7 +131,6 @@ export function FootHeatmap({
                   fill={style.fill}
                   stroke={isHovered ? "#ffffff" : style.stroke}
                   strokeWidth={isHovered ? 2.5 : 1.5}
-                  className="transition-all duration-150"
                 />
 
                 {/* Sensor Number or Pressure Value */}

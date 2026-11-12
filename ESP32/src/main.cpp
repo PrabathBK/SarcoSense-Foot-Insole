@@ -79,6 +79,7 @@ void setup() {
 
   // WiFi
   connectWiFi();
+  espClient.setNoDelay(true); // Disable Nagle's algorithm for instant TCP packet transmission
 
   // MQTT
   client.setServer(mqtt_server, mqtt_port);
@@ -131,9 +132,8 @@ void loop() {
 
   payload += "}";
 
-  // Publish to specific topic (e.g. smart_insole/right) and also test topic
+  // Publish to specific insole topic (e.g. smart_insole/left or smart_insole/right)
   client.publish(mqtt_topic, payload.c_str());
-  client.publish(mqtt_test_topic, payload.c_str());
 
   // Serial monitor output
   Serial.println(payload);

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { useMQTT } from "@/hooks/useMQTT";
+import { initMQTT } from "@/lib/mqttService";
 import { usePatientStore } from "@/store/patientStore";
+import { HardwareStatusStrip } from "@/components/layout/HardwareStatusStrip";
 import { ClinicalBalanceCard } from "@/components/clinical/ClinicalBalanceCard";
 import { PatientCard } from "@/components/patient/PatientCard";
 import { AddPatientDialog } from "@/components/patient/AddPatientDialog";
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 
 export default function ClinicalPage() {
-  const { left, right } = useMQTT();
   const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
   const [isPatientListOpen, setIsPatientListOpen] = useState(false);
   const [isSessionHistoryOpen, setIsSessionHistoryOpen] = useState(false);
@@ -26,6 +26,7 @@ export default function ClinicalPage() {
   const loadPatients = usePatientStore((s) => s.loadPatients);
 
   useEffect(() => {
+    initMQTT();
     loadPatients();
   }, [loadPatients]);
 
@@ -73,73 +74,7 @@ export default function ClinicalPage() {
         </div>
 
         {/* Insole Hardware Connectivity & Signal Health */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div
-            className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${
-              left.connected
-                ? "bg-slate-900/70 border-emerald-500/40 shadow-emerald-500/5 shadow-md"
-                : "bg-slate-900/40 border-slate-800"
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <span
-                className={`w-3 h-3 rounded-full ${
-                  left.connected
-                    ? "bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"
-                    : "bg-slate-600"
-                }`}
-              />
-              <div>
-                <h4 className="font-semibold text-xs text-slate-100">Left Insole Sensor</h4>
-                <p className="text-[11px] text-slate-400 font-mono">
-                  {left.connected ? `20 Hz Sync • ${left.packetCount} packets` : "Awaiting patient setup"}
-                </p>
-              </div>
-            </div>
-            <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                left.connected
-                  ? "bg-emerald-950 text-emerald-300 border border-emerald-800"
-                  : "bg-slate-800 text-slate-400"
-              }`}
-            >
-              {left.connected ? "ACTIVE" : "STANDBY"}
-            </span>
-          </div>
-
-          <div
-            className={`p-3.5 rounded-xl border transition-all flex items-center justify-between ${
-              right.connected
-                ? "bg-slate-900/70 border-cyan-500/40 shadow-cyan-500/5 shadow-md"
-                : "bg-slate-900/40 border-slate-800"
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <span
-                className={`w-3 h-3 rounded-full ${
-                  right.connected
-                    ? "bg-cyan-400 animate-pulse shadow-[0_0_8px_#06b6d4]"
-                    : "bg-slate-600"
-                }`}
-              />
-              <div>
-                <h4 className="font-semibold text-xs text-slate-100">Right Insole Sensor</h4>
-                <p className="text-[11px] text-slate-400 font-mono">
-                  {right.connected ? `20 Hz Sync • ${right.packetCount} packets` : "Awaiting patient setup"}
-                </p>
-              </div>
-            </div>
-            <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                right.connected
-                  ? "bg-cyan-950 text-cyan-300 border border-cyan-800"
-                  : "bg-slate-800 text-slate-400"
-              }`}
-            >
-              {right.connected ? "ACTIVE" : "STANDBY"}
-            </span>
-          </div>
-        </div>
+        <HardwareStatusStrip mode="clinical" />
 
         {/* Clinical Plantar Balance & Asymmetry Card (Replaces the Footprint SVG Heatmap) */}
         <section>

@@ -32,7 +32,7 @@ interface SensorStoreState {
   left: FootDataState;
   right: FootDataState;
 
-  // Rolling IMU history for real-time charts (max 50 points)
+  // Rolling IMU history for real-time charts (max 40 points)
   imuHistory: {
     left: IMUHistoryPoint[];
     right: IMUHistoryPoint[];
@@ -67,11 +67,97 @@ const initialFootState = (): FootDataState => ({
   packetCount: 0,
 });
 
+// High-speed telemetry buffer variables (outside React/Zustand render loop)
+let pendingFootData: {
+  left?: InsoleData;
+  right?: InsoleData;
+} = {};
+
+let pendingRawSamples: RecordedSample[] = [];
+let lastChartUpdate: { left: number; right: number } = { left: 0, right: 0 };
+let rafId: number | null = null;
+
+function flushUpdates() {
+  const currentUpdates = pendingFootData;
+  pendingFootData = {};
+
+  const samplesToAppend = pendingRawSamples;
+  pendingRawSamples = [];
+
+  const now = Date.now();
+  const state = useSensorStore.getState();
+  const updates: Partial<SensorStoreState> = {};
+
+  (["left", "right"] as const).forEach((foot) => {
+    const data = currentUpdates[foot];
+    if (!data) return;
+
+    const currentFoot = state[foot];
+    const dt = currentFoot.lastPacketTime ? (now - currentFoot.lastPacketTime) / 1000 : 0.05;
+    const currentRate = dt > 0 && dt < 2 ? 1 / dt : 20;
+    const smoothedRate =
+      currentFoot.sampleRate === 0
+        ? currentRate
+        : Math.round((currentFoot.sampleRate * 0.7 + currentRate * 0.3) * 10) / 10;
+
+    const imu: IMUData = {
+      ax: Number(data.ax.toFixed(2)),
+      ay: Number(data.ay.toFixed(2)),
+      az: Number(data.az.toFixed(2)),
+      gx: Number(data.gx.toFixed(2)),
+      gy: Number(data.gy.toFixed(2)),
+      gz: Number(data.gz.toFixed(2)),
+    };
+
+    const fsr = Array.isArray(data.fsr) && data.fsr.length === 16 ? data.fsr : [...currentFoot.fsr];
+
+    updates[foot] = {
+      fsr,
+      imu,
+      connected: true,
+      lastPacketTime: now,
+      sampleRate: Math.min(smoothedRate, 50),
+      packetCount: currentFoot.packetCount + 1,
+    };
+
+    // Throttle IMU chart history updates to max ~10 Hz (every 100ms) to prevent Recharts CPU exhaustion
+    if (now - lastChartUpdate[foot] >= 100) {
+      lastChartUpdate[foot] = now;
+      const date = new Date(now);
+      const timeLabel = `${date.getSeconds()}.${Math.floor(date.getMilliseconds() / 100)}`;
+      const newHistoryPoint: IMUHistoryPoint = {
+        time: timeLabel,
+        ...imu,
+      };
+
+      const existingHistory = updates.imuHistory?.[foot] || state.imuHistory[foot];
+      const updatedHistory = [...existingHistory, newHistoryPoint];
+      if (updatedHistory.length > MAX_HISTORY) {
+        updatedHistory.shift();
+      }
+
+      updates.imuHistory = {
+        ...(updates.imuHistory || state.imuHistory),
+        [foot]: updatedHistory,
+      };
+    }
+  });
+
+  if (samplesToAppend.length > 0) {
+    updates.recordedSamples = [...state.recordedSamples, ...samplesToAppend];
+  }
+
+  useSensorStore.setState(updates);
+}
+
 export const useSensorStore = create<SensorStoreState>((set, get) => ({
   brokerStatus: "disconnected",
   brokerError: null,
   setBrokerStatus: (status, error = null) =>
-    set({ brokerStatus: status, brokerError: error }),
+    set({
+      brokerStatus: status,
+      brokerError: error,
+    }),
 
   left: initialFootState(),
   right: initialFootState(),
@@ -92,72 +178,41 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
     if (foot !== "left" && foot !== "right") return;
 
     const now = Date.now();
-    const currentFoot = get()[foot];
-    const dt = currentFoot.lastPacketTime ? (now - currentFoot.lastPacketTime) / 1000 : 0.05;
-    const currentRate = dt > 0 && dt < 2 ? 1 / dt : 20;
-    // Smoothed sample rate
-    const smoothedRate = currentFoot.sampleRate === 0
-      ? currentRate
-      : Math.round((currentFoot.sampleRate * 0.7 + currentRate * 0.3) * 10) / 10;
+    pendingFootData[foot] = data;
 
-    const imu: IMUData = {
-      ax: Number(data.ax.toFixed(2)),
-      ay: Number(data.ay.toFixed(2)),
-      az: Number(data.az.toFixed(2)),
-      gx: Number(data.gx.toFixed(2)),
-      gy: Number(data.gy.toFixed(2)),
-      gz: Number(data.gz.toFixed(2)),
-    };
-
-    // Ensure 16 FSR values
-    const fsr = Array.isArray(data.fsr) && data.fsr.length === 16
-      ? data.fsr
-      : [...currentFoot.fsr];
-
-    // Format time label for chart
-    const date = new Date(now);
-    const timeLabel = `${date.getSeconds()}.${Math.floor(date.getMilliseconds() / 100)}`;
-
-    const newHistoryPoint: IMUHistoryPoint = {
-      time: timeLabel,
-      ...imu,
-    };
-
-    set((state) => {
-      const updatedHistory = [...state.imuHistory[foot], newHistoryPoint];
-      if (updatedHistory.length > MAX_HISTORY) {
-        updatedHistory.shift();
-      }
-
-      // If recording, accumulate sample
-      let updatedSamples = state.recordedSamples;
-      if (state.isRecording) {
-        const sample: RecordedSample = {
-          timestamp: now,
-          [foot]: {
-            fsr: [...fsr],
-            imu: { ...imu },
-          },
-        };
-        updatedSamples = [...state.recordedSamples, sample];
-      }
-
-      return {
+    // Buffer every single raw sample if recording is active (zero data loss for CSV export)
+    if (get().isRecording) {
+      pendingRawSamples.push({
+        timestamp: now,
         [foot]: {
-          fsr,
-          imu,
-          connected: true,
-          lastPacketTime: now,
-          sampleRate: Math.min(smoothedRate, 50),
-          packetCount: currentFoot.packetCount + 1,
+          fsr: [...data.fsr],
+          imu: {
+            ax: Number(data.ax.toFixed(2)),
+            ay: Number(data.ay.toFixed(2)),
+            az: Number(data.az.toFixed(2)),
+            gx: Number(data.gx.toFixed(2)),
+            gy: Number(data.gy.toFixed(2)),
+            gz: Number(data.gz.toFixed(2)),
+          },
         },
-        imuHistory: {
-          ...state.imuHistory,
-          [foot]: updatedHistory,
-        },
-        recordedSamples: updatedSamples,
-      };
-    });
+      });
+    }
+
+    // Schedule RAF update to batch render calls with the display refresh rate
+    if (!rafId) {
+      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        rafId = window.requestAnimationFrame(() => {
+          rafId = null;
+          flushUpdates();
+        });
+      } else {
+        // Fallback for non-browser or test environments
+        rafId = setTimeout(() => {
+          rafId = null;
+          flushUpdates();
+        }, 16) as unknown as number;
+      }
+    }
   },
 
   checkHeartbeats: (timeoutMs = 2500) => {
@@ -188,6 +243,7 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
   },
 
   startRecording: (patientId = "P-DEMO", patientName = "Demo Subject") => {
+    pendingRawSamples = [];
     set({
       isRecording: true,
       recordingStartTime: Date.now(),
@@ -198,6 +254,17 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
   },
 
   stopRecording: () => {
+    if (pendingRawSamples.length > 0) {
+      const remaining = pendingRawSamples;
+      pendingRawSamples = [];
+      const current = get().recordedSamples;
+      const allSamples = [...current, ...remaining];
+      set({
+        isRecording: false,
+        recordedSamples: allSamples,
+      });
+      return allSamples;
+    }
     const samples = get().recordedSamples;
     set({
       isRecording: false,
@@ -206,6 +273,7 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
   },
 
   clearRecording: () => {
+    pendingRawSamples = [];
     set({
       isRecording: false,
       recordingStartTime: null,
@@ -214,6 +282,16 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
   },
 
   resetAll: () => {
+    pendingFootData = {};
+    pendingRawSamples = [];
+    if (rafId) {
+      if (typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+        window.cancelAnimationFrame(rafId);
+      } else {
+        clearTimeout(rafId);
+      }
+      rafId = null;
+    }
     set({
       left: initialFootState(),
       right: initialFootState(),
@@ -223,4 +301,3 @@ export const useSensorStore = create<SensorStoreState>((set, get) => ({
     });
   },
 }));
-

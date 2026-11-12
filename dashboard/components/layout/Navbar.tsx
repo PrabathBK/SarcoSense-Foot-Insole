@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMQTT } from "@/hooks/useMQTT";
+import { useBrokerStatus } from "@/hooks/useMQTT";
 import {
   Footprints,
   Wifi,
@@ -19,7 +19,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ currentMode }: NavbarProps) {
-  const { brokerStatus, isConnected, reconnect } = useMQTT();
+  const { brokerStatus, isConnected, reconnect } = useBrokerStatus();
   const pathname = usePathname();
 
   return (

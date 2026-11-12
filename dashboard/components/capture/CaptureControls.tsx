@@ -26,14 +26,14 @@ export function CaptureControls({
 }: CaptureControlsProps) {
   const isRecording = useSensorStore((s) => s.isRecording);
   const recordingStartTime = useSensorStore((s) => s.recordingStartTime);
-  const recordedSamples = useSensorStore((s) => s.recordedSamples);
+  const sampleCount = useSensorStore((s) => s.recordedSamples.length);
   const startRecording = useSensorStore((s) => s.startRecording);
   const stopRecording = useSensorStore((s) => s.stopRecording);
 
   const activePatient = usePatientStore((s) => s.activePatient);
 
   const [elapsedSec, setElapsedSec] = useState(0);
-  const [lastSavedSamples, setLastSavedSamples] = useState(recordedSamples);
+  const [lastSavedSamples, setLastSavedSamples] = useState<any[]>([]);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   // Stopwatch timer
@@ -97,14 +97,14 @@ export function CaptureControls({
   };
 
   const handleExportCSV = () => {
-    const samplesToExport = isRecording ? recordedSamples : lastSavedSamples;
+    const samplesToExport = isRecording ? useSensorStore.getState().recordedSamples : lastSavedSamples;
     const patientId = activePatient?.patientId || "DEMO-01";
     const patientName = activePatient?.name || "Subject";
     exportSessionToCSV(samplesToExport, patientId, patientName);
   };
 
   const hasExportableData =
-    (isRecording && recordedSamples.length > 0) ||
+    (isRecording && sampleCount > 0) ||
     (!isRecording && lastSavedSamples.length > 0);
 
   return (
@@ -201,7 +201,7 @@ export function CaptureControls({
         <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
           <span className="text-slate-500 block text-[10px] uppercase">Recorded Packets</span>
           <span className="text-base font-bold text-cyan-400">
-            {isRecording ? recordedSamples.length : lastSavedSamples.length}
+            {isRecording ? sampleCount : lastSavedSamples.length}
           </span>
         </div>
 
