@@ -30,7 +30,7 @@ const char* password = "26262626";
 // ===========================
 // MQTT Settings
 // ===========================
-const char* mqtt_server = "broker.hivemq.com";
+const char* mqtt_server = "192.168.8.107";
 const int mqtt_port = 1883;
 const char* mqtt_topic = "smart_insole/" FOOT_SIDE;
 const char* mqtt_test_topic = "smart_insole/test";
@@ -79,7 +79,6 @@ void setup() {
 
   // WiFi
   connectWiFi();
-  espClient.setNoDelay(true); // Disable Nagle's algorithm for instant TCP packet transmission
 
   // MQTT
   client.setServer(mqtt_server, mqtt_port);
@@ -179,6 +178,7 @@ void reconnectMQTT() {
     clientId += String(random(0xffff), HEX);
 
     if (client.connect(clientId.c_str())) {
+      espClient.setNoDelay(true);
       Serial.println("connected");
     } else {
       Serial.print("failed, rc=");
