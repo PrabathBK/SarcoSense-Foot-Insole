@@ -30,7 +30,7 @@ const char* password = "26262626";
 // ===========================
 // MQTT Settings
 // ===========================
-const char* mqtt_server = "broker.hivemq.com";
+const char* mqtt_server = "192.168.8.107";
 const int mqtt_port = 1883;
 const char* mqtt_topic = "smart_insole/" FOOT_SIDE;
 const char* mqtt_test_topic = "smart_insole/test";
