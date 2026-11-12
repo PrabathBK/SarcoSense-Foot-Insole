@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { initMQTT } from "@/lib/mqttService";
 import { usePatientStore } from "@/store/patientStore";
+import { useSensorStore } from "@/store/sensorStore";
 import { HardwareStatusStrip } from "@/components/layout/HardwareStatusStrip";
 import { DualFootView } from "@/components/heatmap/DualFootView";
 import { IMUChart } from "@/components/charts/IMUChart";
@@ -29,6 +30,7 @@ export default function DemoPage() {
   const [isSessionHistoryOpen, setIsSessionHistoryOpen] = useState(false);
 
   const loadPatients = usePatientStore((s) => s.loadPatients);
+  const isStreaming = useSensorStore((s) => s.left.connected || s.right.connected);
 
   useEffect(() => {
     initMQTT();
@@ -88,7 +90,7 @@ export default function DemoPage() {
               Real-Time Dual Foot Heatmap
             </h2>
             <span className="text-xs text-slate-400">
-              {right.connected || left.connected ? (
+              {isStreaming ? (
                 <span className="text-emerald-400 font-mono font-medium flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
                   Streaming active telemetry
